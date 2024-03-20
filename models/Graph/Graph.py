@@ -110,7 +110,7 @@ class Graph:
                         [(i - 1) * number_of_joints + j, i * number_of_joints + j]
                     )
 
-        return edges
+        return np.array(edges)
 
     @staticmethod
     def nodes_generate(frames):
@@ -136,7 +136,7 @@ class Graph:
             # Append padded frame nodes to nodes list
             nodes.extend(frame_nodes)
 
-        return nodes
+        return np.array(nodes)
 
     @staticmethod
     def extract_nodes_features(frames):
