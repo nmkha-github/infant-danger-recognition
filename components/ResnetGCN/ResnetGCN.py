@@ -44,6 +44,8 @@ class ResnetGCN(nn.Module):
         hidden_channels=[64, 64, 128, 128, 256, 256, 512],
     ):
         super(ResnetGCN, self).__init__()
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
         if not hidden_channels:
             hidden_channels = [out_channels]
         self.conv1 = GCNConv(in_channels, hidden_channels[0])
@@ -60,13 +62,16 @@ class ResnetGCN(nn.Module):
         edges_tensor = torch.tensor(edges, dtype=torch.long)
         data = Data(x=x_tensor, edge_index=edges_tensor.t().contiguous())
         data.x = F.normalize(data.x, p=2, dim=0)
+        data = data.to(self.device)
 
         out = F.relu(self.conv1(data.x, data.edge_index))
         for block in self.blocks:
             out = block(out, data.edge_index)
         out = self.conv2(out, data.edge_index)
         # Apply global mean pooling to aggregate node features
-        out = global_mean_pool(out, torch.zeros(out.size(0), dtype=torch.long))
+        out = global_mean_pool(
+            out, torch.zeros(out.size(0), dtype=torch.long).to(self.device)
+        )
         return out.squeeze()
 
 
