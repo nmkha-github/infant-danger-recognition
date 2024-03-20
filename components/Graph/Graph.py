@@ -1,7 +1,7 @@
 import numpy as np
 
-from models.Pose.Pose import Pose
-from models.Graph.utils.calculate_angle import calculate_angle
+from components.Pose.Pose import Pose
+from components.Graph.utils.calculate_angle import calculate_angle
 
 
 class Graph:

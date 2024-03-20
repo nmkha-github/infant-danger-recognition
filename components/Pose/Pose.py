@@ -1,7 +1,7 @@
 import cv2
 import mediapipe as mp
 
-from models.Pose.interface.PoseLandmark import PoseLandmark
+from components.Pose.interface.PoseLandmark import PoseLandmark
 
 
 class Pose:
