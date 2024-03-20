@@ -54,6 +54,7 @@ class ResNetGCN(nn.Module):
         x_tensor = torch.tensor(node_features, dtype=torch.float)
         edges_tensor = torch.tensor(edges, dtype=torch.long)
         data = Data(x=x_tensor, edge_index=edges_tensor.t().contiguous())
+        data.x = F.normalize(data.x, p=2, dim=0)
 
         out = F.relu(self.conv1(data.x, data.edge_index))
         for block in self.blocks:
