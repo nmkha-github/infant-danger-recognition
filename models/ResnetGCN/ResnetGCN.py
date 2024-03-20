@@ -36,9 +36,14 @@ class ResidualBlock(nn.Module):
         return x
 
 
-class ResNetGCN(nn.Module):
-    def __init__(self, in_channels, out_channels, hidden_channels=[]):
-        super(ResNetGCN, self).__init__()
+class ResnetGCN(nn.Module):
+    def __init__(
+        self,
+        in_channels=12,
+        out_channels=512,
+        hidden_channels=[64, 64, 128, 128, 256, 256, 512],
+    ):
+        super(ResnetGCN, self).__init__()
         if not hidden_channels:
             hidden_channels = [out_channels]
         self.conv1 = GCNConv(in_channels, hidden_channels[0])
@@ -67,7 +72,7 @@ class ResNetGCN(nn.Module):
 
 # start_time = time.time()
 
-# model = ResNetGCN(12, 256, hidden_channels=[64, 64, 128, 128, 256, 256])
+# model = ResNetGCN(12, 256, hidden_channels=[64, 64, 128, 128, 256, 256, 512])
 # output = model(graph.nodes, graph.edges)
 # elapsed_time = time.time() - start_time  # Calculate elapsed time
 # print(f"Elapsed time: {elapsed_time} seconds")
