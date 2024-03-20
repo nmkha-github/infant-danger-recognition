@@ -18,7 +18,10 @@ class Graph:
         angles = np.array([angle + [0] * (6 - len(angle)) for angle in angles])
 
         new_node_feature = np.concatenate((coordinates, velocities, angles), axis=1)
-        self.nodes = np.concatenate((self.nodes, new_node_feature), axis=0)
+        if len(self.nodes) > 0:
+            self.nodes = np.concatenate((self.nodes, new_node_feature), axis=0)
+        else:
+            self.nodes = new_node_feature
 
         frame_index = len(self.nodes) // number_of_joints - 1
         if frame_index >= self.max_frames:
