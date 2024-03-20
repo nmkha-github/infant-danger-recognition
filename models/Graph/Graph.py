@@ -1,7 +1,7 @@
 import numpy as np
 
 from models.Pose.Pose import Pose
-from models.ResnetGCN.Graph.utils.calculate_angle import calculate_angle
+from models.Graph.utils.calculate_angle import calculate_angle
 
 
 class Graph:

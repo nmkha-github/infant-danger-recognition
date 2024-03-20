@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch_geometric.nn import GCNConv, global_mean_pool
+from torch_geometric.data import Data
 
 
 class ResidualBlock(nn.Module):
@@ -49,11 +50,27 @@ class ResNetGCN(nn.Module):
         )
         self.conv2 = GCNConv(hidden_channels[len(hidden_channels) - 1], out_channels)
 
-    def forward(self, x, edge_index):
-        x = F.relu(self.conv1(x, edge_index))
+    def forward(self, node_features, edges):
+        x_tensor = torch.tensor(node_features, dtype=torch.float)
+        edges_tensor = torch.tensor(edges, dtype=torch.long)
+        data = Data(x=x_tensor, edge_index=edges_tensor.t().contiguous())
+
+        out = F.relu(self.conv1(data.x, data.edge_index))
         for block in self.blocks:
-            x = block(x, edge_index)
-        x = self.conv2(x, edge_index)
+            out = block(out, data.edge_index)
+        out = self.conv2(out, data.edge_index)
         # Apply global mean pooling to aggregate node features
-        x = global_mean_pool(x, torch.zeros(x.size(0), dtype=torch.long))
-        return x
+        out = global_mean_pool(out, torch.zeros(out.size(0), dtype=torch.long))
+        return out.squeeze()
+
+
+# start_time = time.time()
+
+# model = ResNetGCN(12, 256, hidden_channels=[64, 64, 128, 128, 256, 256])
+# output = model(graph.nodes, graph.edges)
+# elapsed_time = time.time() - start_time  # Calculate elapsed time
+# print(f"Elapsed time: {elapsed_time} seconds")
+
+# print(output.shape)
+# print(output)
+# print(summary(model, graph.nodes, graph.edges))
