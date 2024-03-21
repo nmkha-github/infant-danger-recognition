@@ -1,0 +1,79 @@
+import cv2
+import numpy as np
+import torch
+import torch.nn as nn
+from torchvision import transforms
+
+from components.Graph.Graph import Graph
+from components.ResnetCNN.ResnetCNN import ResnetCNN
+from components.ResnetGCN.ResnetGCN import ResnetGCN
+
+
+class SimpleModel(nn.Module):
+    def __init__(self, num_action_class=5):
+        super(SimpleModel, self).__init__()
+        self.graph = Graph()
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.gcn = ResnetGCN(hidden_channels=[64, 64, 128, 128, 256, 256])
+        self.cnn = ResnetCNN()
+        self.action_classify = nn.Sequential(
+            nn.Linear(1024, 512),
+            nn.Dropout(p=0.5, inplace=True),
+            nn.Linear(512, num_action_class),
+            nn.Softmax(dim=0),
+        )
+        self.danger_recognition = nn.Sequential(
+            nn.Linear(1024, 512),
+            nn.ReLU(),
+            nn.Dropout(p=0.5, inplace=True),
+            nn.Linear(512, 128),
+            nn.ReLU(),
+            nn.Dropout(p=0.5, inplace=True),
+            nn.Linear(128, 1),
+            nn.Sigmoid(),
+        )
+
+    def forward(self, tensor_frame):
+        with torch.no_grad():
+            np_frame = np.array(tensor_frame.cpu(), dtype="uint8")
+            if tensor_frame.shape[0] != 224 or tensor_frame.shape[1] != 224:
+                np_frame = cv2.resize(np_frame, (224, 224))
+
+            # GCN flow
+            self.graph.append(np_frame)
+            feature1 = self.gcn(node_features=self.graph.nodes, edges=self.graph.edges)
+
+            # CNN flow
+            context_frame = SimpleModel.nomarlize_frame(np_frame).to(self.device)
+            feature2 = self.cnn(context_frame)
+
+            combine_feature = torch.cat((feature1, feature2), dim=0)
+
+            action_output = self.action_classify(combine_feature)
+            danger_output = self.danger_recognition(combine_feature)
+            return action_output, danger_output
+
+    @staticmethod
+    def nomarlize_frame(image):
+        transform = transforms.Compose(
+            [
+                transforms.ToPILImage(),
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+                ),
+            ]
+        )
+
+        image = transform(image).unsqueeze(0)
+        return image
+
+
+# model = SimpleModel(5).to(device)
+# start_time = time.time()
+# action, danger = model(torch.tensor(img).to(device))
+# elapsed_time = time.time() - start_time  # Calculate elapsed time
+# print(f"SimpleModel elapsed time: {elapsed_time} seconds")
+
+# print(action)
+# print(danger)
