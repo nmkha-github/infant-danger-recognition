@@ -14,7 +14,7 @@ class SimpleModel(nn.Module):
         super(SimpleModel, self).__init__()
         self.graph = Graph()
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.gcn = ResnetGCN(hidden_channels=[64, 64, 128, 128, 256, 256])
+        self.gcn = ResnetGCN()
         self.cnn = ResnetCNN()
         self.action_classify = nn.Sequential(
             nn.Linear(1024, 512),

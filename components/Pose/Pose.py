@@ -36,7 +36,13 @@ class Pose:
     @staticmethod
     def extract_landmarks_mediapipe(image):
         with mp.solutions.pose.Pose(
-            static_image_mode=True, min_detection_confidence=0.5
+            static_image_mode=False,
+            model_complexity=0,
+            smooth_landmarks=True,
+            enable_segmentation=False,
+            smooth_segmentation=True,
+            min_detection_confidence=0.3,
+            min_tracking_confidence=0.3,
         ) as pose:
             results = pose.process(image)
             landmarks = results.pose_landmarks
