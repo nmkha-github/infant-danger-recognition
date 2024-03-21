@@ -58,8 +58,8 @@ class ResnetGCN(nn.Module):
         self.conv2 = GCNConv(hidden_channels[len(hidden_channels) - 1], out_channels)
 
     def forward(self, node_features, edges):
-        x_tensor = torch.tensor(node_features, dtype=torch.float)
-        edges_tensor = torch.tensor(edges, dtype=torch.long)
+        x_tensor = torch.tensor(node_features, dtype=torch.float).to(self.device)
+        edges_tensor = torch.tensor(edges, dtype=torch.long).to(self.device)
         data = Data(x=x_tensor, edge_index=edges_tensor.t().contiguous())
         data.x = F.normalize(data.x, p=2, dim=0)
         data = data.to(self.device)
