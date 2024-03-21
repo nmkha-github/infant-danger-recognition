@@ -16,17 +16,24 @@ class SimpleModel(nn.Module):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.gcn = ResnetGCN()
         self.cnn = ResnetCNN()
-        self.action_classify = nn.Sequential(
+        self.MLP = nn.Sequential(
             nn.Linear(1024, 512),
+            nn.ReLU(),
+            nn.Linear(512, 512),
+            nn.ReLU(),
+        )
+        self.action_classify = nn.Sequential(
+            nn.Linear(512, 256),
+            nn.ReLU(),
             nn.Dropout(p=0.5, inplace=True),
-            nn.Linear(512, num_action_class),
+            nn.Linear(256, num_action_class),
             nn.Softmax(dim=0),
         )
         self.danger_recognition = nn.Sequential(
-            nn.Linear(1024, 512),
+            nn.Linear(512, 256),
             nn.ReLU(),
             nn.Dropout(p=0.5, inplace=True),
-            nn.Linear(512, 128),
+            nn.Linear(256, 128),
             nn.ReLU(),
             nn.Dropout(p=0.5, inplace=True),
             nn.Linear(128, 1),
@@ -48,9 +55,10 @@ class SimpleModel(nn.Module):
             feature2 = self.cnn(context_frame)
 
             combine_feature = torch.cat((feature1, feature2), dim=0)
+            MLP_output = self.MLP(combine_feature)
 
-            action_output = self.action_classify(combine_feature)
-            danger_output = self.danger_recognition(combine_feature)
+            action_output = self.action_classify(MLP_output)
+            danger_output = self.danger_recognition(MLP_output)
             return action_output, danger_output
 
     @staticmethod
