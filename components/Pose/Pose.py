@@ -1,3 +1,9 @@
+import sys
+import os
+
+project_path = os.getcwd()
+sys.path.insert(0, project_path)
+
 import cv2
 import mediapipe as mp
 

@@ -1,3 +1,9 @@
+import sys
+import os
+
+project_path = os.getcwd()
+sys.path.insert(0, project_path)
+
 import numpy as np
 
 from components.Pose.Pose import Pose
