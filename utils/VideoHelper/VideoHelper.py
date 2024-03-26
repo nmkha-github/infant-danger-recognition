@@ -3,13 +3,16 @@ import cv2
 
 class VideoHelper:
     @staticmethod
-    def extract_frames(video_path, num_frames):
+    def extract_frames(video_path, num_frames, fps=4):
+        """
+        extract frames by fps and drop frames to fix num_frames
+        Note:
+        you should keep length video (seconds) equal num_frames // fps to get full video context
+        """
         try:
             cap = cv2.VideoCapture(video_path)
             total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-            frame_interval = max(
-                total_frames // num_frames, 1
-            )  # Ensure at least one frame per interval
+            frame_interval = max(total_frames // fps, 1)
 
             frames = []
             for i in range(num_frames):
@@ -20,11 +23,9 @@ class VideoHelper:
                     frames.append(frame)
                 else:
                     # If there are fewer frames than expected, add the final frame repeatedly
-                    final_frame_num = total_frames - 1
-                    cap.set(cv2.CAP_PROP_POS_FRAMES, final_frame_num)
-                    ret, frame = cap.read()
-                    if ret:
-                        frames.extend([frame] * (num_frames - len(frames)))
+                    frames.extend(
+                        [frames[len(frames) - 1]] * (num_frames - len(frames))
+                    )
                     break
 
             cap.release()
