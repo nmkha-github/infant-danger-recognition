@@ -43,8 +43,7 @@ class SimpleModel(nn.Module):
     def forward(self, tensor_frame):
         with torch.no_grad():
             np_frame = np.array(tensor_frame.cpu(), dtype="uint8")
-            if tensor_frame.shape[0] != 224 or tensor_frame.shape[1] != 224:
-                np_frame = cv2.resize(np_frame, (224, 224))
+            assert tensor_frame.shape[0] != 224 or tensor_frame.shape[1] != 224
 
             # GCN flow
             self.graph.append(np_frame)
