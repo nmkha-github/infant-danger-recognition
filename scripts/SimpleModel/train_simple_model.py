@@ -102,11 +102,26 @@ for epoch in range(num_epochs):
         optimizer.step()
 
     if epoch == 0:
-        f = open("init_parameter_loss.txt", "w")
+        f = open(
+            os.path.join(
+                project_path, f"saved_models/SimpleModel/init_parameter_loss.txt"
+            ),
+            "w",
+        )
         f.write(str(max_loss))
         f.close()
     if epoch % 50 == 0:
-        torch.save(model.state_dict(), f"saved_models/SimpleModel_epoch_{epoch}.pth")
-        torch.save(optimizer.state_dict(), f"saved_models/optimizer_epoch_{epoch}.pth")
+        torch.save(
+            model.state_dict(),
+            os.path.join(
+                project_path, f"saved_models/SimpleModel/SimpleModel_epoch_{epoch}.pth"
+            ),
+        )
+        torch.save(
+            optimizer.state_dict(),
+            os.path.join(
+                project_path, f"saved_models/SimpleModel/optimizer_epoch_{epoch}.pth"
+            ),
+        )
 
 print("Finished Training")

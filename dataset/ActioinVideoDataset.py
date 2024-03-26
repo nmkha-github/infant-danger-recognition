@@ -49,9 +49,14 @@ class ActionVideoDataset(Dataset):
         # print(action_label)
         # print(danger_label)
 
-        f = open("ActionVideoDataset_Log.txt", "a")
+        f = open(
+            os.path.join(
+                project_path, "saved_models/SimpleModel/ActionVideoDataset_Log.txt"
+            ),
+            "a",
+        )
         f.write(
-            f"video {video_index} {frames_tensor.shape} action {action_label} danger {danger_label}"
+            f"video {video_index} {frames_tensor.shape} action {action_label} danger {danger_label}\n"
         )
         f.close()
         return frames_tensor, action_label, danger_label
