@@ -47,8 +47,8 @@ class SimpleModel(nn.Module):
 
     def forward(self, tensor_frame):
         with torch.no_grad():
-            np_frame = np.array(tensor_frame.cpu(), dtype="uint8")
             assert tensor_frame.shape == (224, 224, 3), "Reshape frame to (224, 224, 3)"
+            np_frame = np.array(tensor_frame.cpu(), dtype="uint8")
 
             # GCN flow
             self.graph.append(np_frame)
