@@ -4,7 +4,6 @@ import os
 project_path = os.getcwd()
 sys.path.insert(0, project_path)
 
-import numpy as np
 import torch
 import torch.nn as nn
 from torchvision import transforms
@@ -15,9 +14,14 @@ from components.ResnetGCN.ResnetGCN import ResnetGCN
 
 
 class SimpleModel(nn.Module):
+    """
+    forward:
+        - graph: Graph class.
+        - context_frame: image tensor shape [3, 224, 224]
+    """
+
     def __init__(self, num_action_class=5):
         super(SimpleModel, self).__init__()
-        self.graph = Graph()
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.gcn = ResnetGCN()
         self.cnn = ResnetCNN()
@@ -45,17 +49,19 @@ class SimpleModel(nn.Module):
             nn.Sigmoid(),
         )
 
-    def forward(self, tensor_frame):
+    def forward(self, graph, context_frame):
         with torch.no_grad():
-            assert tensor_frame.shape == (224, 224, 3), "Reshape frame to (224, 224, 3)"
-            np_frame = np.array(tensor_frame.cpu(), dtype="uint8")
+            assert context_frame.shape == (
+                3,
+                224,
+                224,
+            ), "Reshape frame to (224, 224, 3)"
 
             # GCN flow
-            self.graph.append(np_frame)
-            feature1 = self.gcn(node_features=self.graph.nodes, edges=self.graph.edges)
+            feature1 = self.gcn(node_features=graph.nodes, edges=graph.edges)
 
             # CNN flow
-            context_frame = SimpleModel.nomarlize_frame(np_frame).to(self.device)
+            context_frame = SimpleModel.nomarlize_frame(context_frame)
             feature2 = self.cnn(context_frame)
 
             combine_feature = torch.cat((feature1, feature2), dim=0)
@@ -66,18 +72,16 @@ class SimpleModel(nn.Module):
             return action_output, danger_output
 
     @staticmethod
-    def nomarlize_frame(image):
+    def nomarlize_frame(frame):
         transform = transforms.Compose(
             [
-                transforms.ToPILImage(),
-                transforms.ToTensor(),
                 transforms.Normalize(
                     mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
                 ),
             ]
         )
 
-        image = transform(image).unsqueeze(0)
+        image = transform(frame).unsqueeze(0)
         return image
 
 

@@ -1,9 +1,12 @@
 import sys
 import os
 
+import numpy as np
+
 project_path = os.getcwd()
 sys.path.insert(0, project_path)
 
+from components.Graph.Graph import Graph
 import torch
 import torch.optim as optim
 from tqdm import tqdm
@@ -11,7 +14,6 @@ from dataset.ActioinVideoDataset import ActionVideoDataset
 from models.SimpleModel.SimpleModel import SimpleModel
 from torch import nn
 from torch.utils.data import DataLoader
-from torchvision import transforms
 
 import warnings
 
@@ -26,16 +28,12 @@ validate_excel_path = os.path.join(
 )
 test_excel_path = os.path.join(project_path, "data/Short_Videos/annotation/test.xlsx")
 
-transform = transforms.Compose(
-    [transforms.ToPILImage(), transforms.Resize((224, 224)), transforms.ToTensor()]
-)
-train_dataset = ActionVideoDataset(
-    video_folder_path, train_excel_path, transform=transform
-)
+train_dataset = ActionVideoDataset(video_folder_path, train_excel_path)
 train_dataloader = DataLoader(train_dataset, batch_size=32, shuffle=True)
 
 # Initialize your model
-model = SimpleModel(5)
+num_class = 5
+model = SimpleModel(num_class)
 model.to(model.device)  # Move model to device
 
 # Define initial losses
@@ -57,23 +55,24 @@ for epoch in range(num_epochs):
         batch_frames, batch_action_label, batch_danger_label = (
             data  # Assuming your data is in the format (inputs, labels)
         )
-        batch_frames = batch_frames.to(model.device)
-        batch_action_label = batch_action_label.to(model.device)
-        batch_danger_label = batch_danger_label.to(model.device)
+        batch_frames = batch_frames.to(model.device)  # shape [batch, 3, 224, 224]
+        batch_action_label = batch_action_label.to(
+            model.device
+        )  # shape [batch, num_class]
+        batch_danger_label = batch_danger_label.to(model.device)  # shape [batch]
 
         optimizer.zero_grad()
 
         # Forward frame
-        batch_outputs_action = torch.empty(0, 5, requires_grad=True).to(
+        batch_outputs_action = torch.empty(0, num_class, requires_grad=True).to(
             model.device
         )  # num class = 5
         batch_outputs_danger = torch.empty(0, requires_grad=True).to(model.device)
         for _, frames in enumerate(batch_frames):
-            for idx, frame in enumerate(frames):
-                if idx < frames.shape[0] - 1:
-                    model(frame)
+            np_frames = frames.permute(0, 2, 3, 1).cpu().numpy().astype(np.uint8)
+            graph = Graph(frames=np_frames)
             outputs_action, outputs_danger = model(
-                frame
+                graph=graph, context_frame=frames[len(frames) // 2]
             )  # example output: tensor([0.1, 0.2, 0.3, 0.2, 0.2]) and tensor([0.443])
             outputs_action = outputs_action.unsqueeze(0)
             batch_outputs_action = torch.cat((batch_outputs_action, outputs_action), 0)

@@ -11,6 +11,20 @@ from components.Graph.utils.calculate_angle import calculate_angle
 
 
 class Graph:
+    """
+    input:
+    - frames (numpy array)
+    - max_frames (int): drop head frame if stored frame length >= max_frames.
+
+    output:
+    - nodes: embedding nodes features list (numpy array shape [number of frames, 12])
+        - x, y, z of joint.
+        - velocities of joint coordinate compare previous joint coordinate.
+        - angles of joint. (max 6 angles).
+    - edges: spatial and temporal joint connection list (numpy array shape [number of frames, 2]).
+
+    """
+
     def __init__(self, frames=[], max_frames=20):
         self.edges = Graph.edges_generate(len(frames))
         self.nodes = Graph.nodes_generate(frames)
