@@ -13,6 +13,10 @@ from torch import nn
 from torch.utils.data import DataLoader
 from torchvision import transforms
 
+import warnings
+
+warnings.filterwarnings("ignore")
+
 
 # Prepare data
 video_folder_path = os.path.join(project_path, "data/Short_Videos")
