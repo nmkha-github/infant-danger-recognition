@@ -34,22 +34,54 @@ train_dataloader = DataLoader(train_dataset, batch_size=32, shuffle=True)
 # Initialize your model
 num_class = 5
 model = SimpleModel(num_class)
-model.to(model.device)  # Move model to device
-
-# Define initial losses
-initial_loss_action = float("inf")
-initial_loss_danger = float("inf")
 
 # Define loss function and optimizer
 criterion_action = nn.CrossEntropyLoss()
 criterion_danger = nn.BCELoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
+# Load
+initial_loss_action, initial_loss_danger = map(
+    float,
+    open(os.path.join(project_path, "saved_models/SimpleModel/init_parameter_loss.txt"))
+    .read()
+    .split(),
+)
+
+epoch = int(
+    open(os.path.join(project_path, "saved_models/SimpleModel/current_epoch.txt"))
+    .read()
+    .strip()
+)
+print(f"Training epoch {epoch}...")
+previous_epoch = epoch - 1
+model.load_state_dict(
+    torch.load(
+        os.path.join(
+            project_path,
+            f"saved_models/SimpleModel/epoch_{previous_epoch}/SimpleModel_epoch_{previous_epoch}.pth",
+        )
+    )
+)
+optimizer.load_state_dict(
+    torch.load(
+        os.path.join(
+            project_path,
+            f"saved_models/SimpleModel/epoch_{previous_epoch}/optimizer_epoch_{previous_epoch}.pth",
+        )
+    )
+)
+
+model.to(model.device)  # Move model to device
+
 # Training loop
-num_epochs = 1
-for epoch in range(num_epochs):
+while True:
     model.train()
-    max_loss = [0, 0]
+
+    total_correct_action = 0
+    total_correct_danger = 0
+    total_samples = 0
+    total_loss = 0
 
     for i, data in enumerate(tqdm(train_dataloader)):
         batch_frames, batch_action_label, batch_danger_label = (
@@ -86,45 +118,64 @@ for epoch in range(num_epochs):
             batch_outputs_danger, batch_danger_label
         )  # Assuming you have danger labels
 
-        if epoch == 0:
-            initial_loss_action = loss_action.item()
-            initial_loss_danger = loss_danger.item()
-
         alpha = torch.tensor(2)
         lambda1 = torch.pow(loss_action.item() / initial_loss_action, alpha)
         lambda2 = torch.pow(loss_danger.item() / initial_loss_danger, alpha)
 
         loss = lambda1 * loss_action + lambda2 * loss_danger
-        max_loss = [
-            max(max_loss[0], loss_action.item()),
-            max(max_loss[0], loss_danger.item()),
-        ]
+
+        # Result in train dataset
+        # Compute accuracy for action
+        _, predicted_action = torch.max(batch_outputs_action, 1)
+        total_correct_action += (predicted_action == batch_action_label).sum().item()
+
+        # Compute accuracy for danger
+        predicted_danger = (
+            batch_outputs_danger > 0.5
+        ).float()  # assuming threshold 0.5
+        total_correct_danger += (predicted_danger == batch_danger_label).sum().item()
+
+        total_samples += batch_frames.size(0)
+
+        total_loss += loss.item()
 
         # Backward pass and optimize
         loss.backward()
         optimizer.step()
 
-    if epoch == 0:
-        f = open(
-            os.path.join(
-                project_path, f"saved_models/SimpleModel/init_parameter_loss.txt"
-            ),
-            "w",
-        )
-        f.write(str(max_loss))
-        f.close()
-    if epoch % 50 == 0:
+    # Calculate accuracy
+    accuracy_action = total_correct_action / total_samples
+    accuracy_danger = total_correct_danger / total_samples
+    print(
+        f"Epoch {epoch}: Loss {total_loss} Accuracy Action: {accuracy_action}, Accuracy Danger: {accuracy_danger}"
+    )
+
+    if epoch % 1 == 0:
+        save_dir = os.path.join(project_path, "saved_models/SimpleModel/epoch_{epoch}/")
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+
         torch.save(
             model.state_dict(),
             os.path.join(
-                project_path, f"saved_models/SimpleModel/SimpleModel_epoch_{epoch}.pth"
+                project_path,
+                f"saved_models/SimpleModel/epoch_{epoch}/SimpleModel_epoch_{epoch}.pth",
             ),
         )
         torch.save(
             optimizer.state_dict(),
             os.path.join(
-                project_path, f"saved_models/SimpleModel/optimizer_epoch_{epoch}.pth"
+                project_path,
+                f"saved_models/SimpleModel/epoch_{epoch}/optimizer_epoch_{epoch}.pth",
             ),
         )
+
+        with open(
+            os.path.join(project_path, "saved_models/SimpleModel/current_epoch.txt"),
+            "w",
+        ) as file:
+            file.write(str(epoch + 1))
+
+    epoch += 1
 
 print("Finished Training")
