@@ -53,7 +53,6 @@ epoch = int(
     .read()
     .strip()
 )
-print(f"Training epoch {epoch}...")
 previous_epoch = epoch - 1
 model.load_state_dict(
     torch.load(
@@ -73,9 +72,11 @@ optimizer.load_state_dict(
 )
 
 model.to(model.device)  # Move model to device
+print("##########Training with ", model.device)
 
 # Training loop
 while True:
+    print(f"Training epoch {epoch}...")
     model.train()
 
     total_correct_action = 0
@@ -151,7 +152,9 @@ while True:
     )
 
     if epoch % 1 == 0:
-        save_dir = os.path.join(project_path, "saved_models/SimpleModel/epoch_{epoch}/")
+        save_dir = os.path.join(
+            project_path, f"saved_models/SimpleModel/epoch_{epoch}/"
+        )
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
 
@@ -169,6 +172,22 @@ while True:
                 f"saved_models/SimpleModel/epoch_{epoch}/optimizer_epoch_{epoch}.pth",
             ),
         )
+
+        with open(
+            os.path.join(
+                project_path, f"saved_models/SimpleModel/epoch_{epoch}/loss.txt"
+            ),
+            "w",
+        ) as file:
+            file.write(str(total_loss))
+
+        with open(
+            os.path.join(
+                project_path, f"saved_models/SimpleModel/epoch_{epoch}/accuracy.txt"
+            ),
+            "w",
+        ) as file:
+            file.write(str(accuracy_action) + "\n" + str(accuracy_danger))
 
         with open(
             os.path.join(project_path, "saved_models/SimpleModel/current_epoch.txt"),

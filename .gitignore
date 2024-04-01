@@ -1,3 +1,6 @@
+# train file
+*.pth
+
 # data
 data/
 

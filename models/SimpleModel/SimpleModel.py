@@ -8,7 +8,6 @@ import torch
 import torch.nn as nn
 from torchvision import transforms
 
-from components.Graph.Graph import Graph
 from components.ResnetCNN.ResnetCNN import ResnetCNN
 from components.ResnetGCN.ResnetGCN import ResnetGCN
 
@@ -55,7 +54,7 @@ class SimpleModel(nn.Module):
                 3,
                 224,
                 224,
-            ), "Reshape frame to (224, 224, 3)"
+            ), "Reshape frame to (3, 224, 224)"
 
             # GCN flow
             feature1 = self.gcn(node_features=graph.nodes, edges=graph.edges)
@@ -83,13 +82,3 @@ class SimpleModel(nn.Module):
 
         image = transform(frame).unsqueeze(0)
         return image
-
-
-# model = SimpleModel(5).to(device)
-# start_time = time.time()
-# action, danger = model(torch.tensor(img).to(device))
-# elapsed_time = time.time() - start_time  # Calculate elapsed time
-# print(f"SimpleModel elapsed time: {elapsed_time} seconds")
-
-# print(action)
-# print(danger)

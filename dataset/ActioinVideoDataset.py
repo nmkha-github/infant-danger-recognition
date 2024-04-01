@@ -47,14 +47,14 @@ class ActionVideoDataset(Dataset):
         # print(action_label)
         # print(danger_label)
 
-        f = open(
-            os.path.join(
-                project_path, "saved_models/SimpleModel/ActionVideoDataset_Log.txt"
-            ),
-            "a",
-        )
-        f.write(
-            f"video {video_index} {frames_tensor.shape} action {action_label} danger {danger_label}\n"
-        )
-        f.close()
+        # f = open(
+        #     os.path.join(
+        #         project_path, "saved_models/SimpleModel/ActionVideoDataset_Log.txt"
+        #     ),
+        #     "a",
+        # )
+        # f.write(
+        #     f"video {video_index} {frames_tensor.shape} action {action_label} danger {danger_label}\n"
+        # )
+        # f.close()
         return resize_frames, action_label, danger_label
