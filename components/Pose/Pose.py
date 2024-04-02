@@ -48,7 +48,7 @@ class Pose:
             enable_segmentation=False,
             smooth_segmentation=True,
             min_detection_confidence=0,
-            min_tracking_confidence=0.5,
+            min_tracking_confidence=0.2,
         ) as pose:
             results = pose.process(image)
             landmarks = results.pose_landmarks

@@ -29,7 +29,7 @@ validate_excel_path = os.path.join(
 test_excel_path = os.path.join(project_path, "data/Short_Videos/annotation/test.xlsx")
 
 train_dataset = ActionVideoDataset(video_folder_path, train_excel_path)
-train_dataloader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+train_dataloader = DataLoader(train_dataset, batch_size=64, shuffle=True)
 
 # Initialize your model
 num_class = 5
