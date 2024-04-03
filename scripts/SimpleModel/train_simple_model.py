@@ -70,6 +70,8 @@ optimizer.load_state_dict(
         )
     )
 )
+for param_group in optimizer.param_groups:
+    param_group["lr"] = 0.01
 
 model.to(model.device)  # Move model to device
 print("##########Training with ", model.device)
