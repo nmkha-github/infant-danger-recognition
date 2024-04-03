@@ -34,6 +34,7 @@ class ActionVideoDataset(Dataset):
         )
         frames = np.array(VideoHelper.extract_frames(video_path, 20))
 
+        video_index = torch.tensor(video_index, dtype=torch.long)
         action_label = torch.tensor(action_label, dtype=torch.long)
         danger_label = torch.tensor(danger_label, dtype=torch.float)
         frames_tensor = torch.tensor(frames)
@@ -57,4 +58,4 @@ class ActionVideoDataset(Dataset):
         #     f"video {video_index} {frames_tensor.shape} action {action_label} danger {danger_label}\n"
         # )
         # f.close()
-        return resize_frames, action_label, danger_label
+        return video_index, resize_frames, action_label, danger_label

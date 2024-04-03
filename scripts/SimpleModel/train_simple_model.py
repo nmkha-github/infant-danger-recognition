@@ -76,6 +76,7 @@ for param_group in optimizer.param_groups:
 model.to(model.device)  # Move model to device
 print("##########Training with ", model.device)
 
+dict_graph = {}
 # Training loop
 while True:
     print(f"Training epoch {epoch}...")
@@ -87,9 +88,10 @@ while True:
     total_loss = 0
 
     for i, data in enumerate(tqdm(train_dataloader)):
-        batch_frames, batch_action_label, batch_danger_label = (
+        batch_video_index, batch_frames, batch_action_label, batch_danger_label = (
             data  # Assuming your data is in the format (inputs, labels)
         )
+        batch_video_index = batch_video_index.to(model.device)
         batch_frames = batch_frames.to(model.device)  # shape [batch, 3, 224, 224]
         batch_action_label = batch_action_label.to(
             model.device
@@ -103,9 +105,15 @@ while True:
             model.device
         )  # num class = 5
         batch_outputs_danger = torch.empty(0, requires_grad=True).to(model.device)
-        for _, frames in enumerate(batch_frames):
-            np_frames = frames.permute(0, 2, 3, 1).cpu().numpy().astype(np.uint8)
-            graph = Graph(frames=np_frames)
+        for batch_index, frames in enumerate(batch_frames):
+            graph = None
+            if batch_video_index[batch_index] in dict_graph:
+                graph = dict_graph[batch_video_index[batch_index]]
+            else:
+                np_frames = frames.permute(0, 2, 3, 1).cpu().numpy().astype(np.uint8)
+                graph = Graph(frames=np_frames)
+                dict_graph[batch_video_index[batch_index]] = graph
+
             outputs_action, outputs_danger = model(
                 graph=graph, context_frame=frames[len(frames) // 2]
             )  # example output: tensor([0.1, 0.2, 0.3, 0.2, 0.2]) and tensor([0.443])
