@@ -107,12 +107,12 @@ while True:
         batch_outputs_danger = torch.empty(0, requires_grad=True).to(model.device)
         for batch_index, frames in enumerate(batch_frames):
             graph = None
-            if batch_video_index[batch_index] in dict_graph:
-                graph = dict_graph[batch_video_index[batch_index]]
+            if batch_video_index[batch_index].item() in dict_graph:
+                graph = dict_graph[batch_video_index[batch_index].item()]
             else:
                 np_frames = frames.permute(0, 2, 3, 1).cpu().numpy().astype(np.uint8)
                 graph = Graph(frames=np_frames)
-                dict_graph[batch_video_index[batch_index]] = graph
+                dict_graph[batch_video_index[batch_index].item()] = graph
 
             outputs_action, outputs_danger = model(
                 graph=graph, context_frame=frames[len(frames) // 2]

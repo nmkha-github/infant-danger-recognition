@@ -1,6 +1,7 @@
 # train file
 *.pth
-
+accuracy.txt
+loss.txt
 # data
 data/
 
