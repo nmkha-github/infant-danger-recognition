@@ -205,6 +205,19 @@ while True:
         ) as file:
             file.write(str(epoch + 1))
 
+    for video_index in dict_graph:
+        node_features = dict_graph[video_index].nodes
+        with open(
+            os.path.join(project_path, "train_pose.csv"),
+            "w",
+        ) as file:
+            frame = 0
+            for node, feature in enumerate(node_features):
+                if node % 33 == 0:
+                    file.write("\n" + str(video_index) + "," + str(frame) + ",")
+                    frame += 1
+                file.write(str([feature[0], feature[1], feature[2]]) + ",")
+
     epoch += 1
 
 print("Finished Training")
