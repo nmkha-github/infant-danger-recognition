@@ -20,7 +20,7 @@ class NoDropoutModel(nn.Module):
     """
 
     def __init__(self, num_action_class=5):
-        super(SimpleModel, self).__init__()
+        super(NoDropoutModel, self).__init__()
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.gcn = ResnetGCN()
         self.cnn = ResnetCNN()
@@ -57,7 +57,7 @@ class NoDropoutModel(nn.Module):
             feature1 = self.gcn(node_features=graph.nodes, edges=graph.edges)
 
             # CNN flow
-            context_frame = SimpleModel.nomarlize_frame(context_frame)
+            context_frame = NoDropoutModel.nomarlize_frame(context_frame)
             feature2 = self.cnn(context_frame)
 
             combine_feature = torch.cat((feature1, feature2), dim=0)
