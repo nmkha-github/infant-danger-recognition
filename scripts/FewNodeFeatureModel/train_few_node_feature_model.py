@@ -11,7 +11,7 @@ import torch
 import torch.optim as optim
 from tqdm import tqdm
 from dataset.ActioinVideoDataset import ActionVideoDataset
-from models.NoDropoutModel.NoDropoutModel import NoDropoutModel
+from models.FewNodeFeatureModel.FewNodeFeatureModel import FewNodeFeatureModel
 from torch import nn
 from torch.utils.data import DataLoader
 
@@ -33,7 +33,7 @@ train_dataloader = DataLoader(train_dataset, batch_size=128, shuffle=True)
 
 # Initialize your model
 num_class = 5
-model = NoDropoutModel(num_class)
+model = FewNodeFeatureModel(num_class)
 
 # Define loss function and optimizer
 criterion_action = nn.CrossEntropyLoss()
@@ -60,7 +60,7 @@ if epoch > 0:
         torch.load(
             os.path.join(
                 project_path,
-                f"saved_models/NoDropoutModel/epoch_{previous_epoch}/NoDropoutModel_epoch_{previous_epoch}.pth",
+                f"saved_models/FewNodeFeatureModel/epoch_{previous_epoch}/FewNodeFeatureModel_epoch_{previous_epoch}.pth",
             )
         )
     )
@@ -68,7 +68,7 @@ if epoch > 0:
         torch.load(
             os.path.join(
                 project_path,
-                f"saved_models/NoDropoutModel/epoch_{previous_epoch}/optimizer_epoch_{previous_epoch}.pth",
+                f"saved_models/FewNodeFeatureModel/epoch_{previous_epoch}/optimizer_epoch_{previous_epoch}.pth",
             )
         )
     )
@@ -163,7 +163,7 @@ while True:
 
     if epoch % 1 == 0:
         save_dir = os.path.join(
-            project_path, f"saved_models/NoDropoutModel/epoch_{epoch}/"
+            project_path, f"saved_models/FewNodeFeatureModel/epoch_{epoch}/"
         )
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
@@ -172,20 +172,20 @@ while True:
             model.state_dict(),
             os.path.join(
                 project_path,
-                f"saved_models/NoDropoutModel/epoch_{epoch}/NoDropoutModel_epoch_{epoch}.pth",
+                f"saved_models/FewNodeFeatureModel/epoch_{epoch}/FewNodeFeatureModel_epoch_{epoch}.pth",
             ),
         )
         torch.save(
             optimizer.state_dict(),
             os.path.join(
                 project_path,
-                f"saved_models/NoDropoutModel/epoch_{epoch}/optimizer_epoch_{epoch}.pth",
+                f"saved_models/FewNodeFeatureModel/epoch_{epoch}/optimizer_epoch_{epoch}.pth",
             ),
         )
 
         with open(
             os.path.join(
-                project_path, f"saved_models/NoDropoutModel/epoch_{epoch}/loss.txt"
+                project_path, f"saved_models/FewNodeFeatureModel/epoch_{epoch}/loss.txt"
             ),
             "w",
         ) as file:
@@ -193,14 +193,17 @@ while True:
 
         with open(
             os.path.join(
-                project_path, f"saved_models/NoDropoutModel/epoch_{epoch}/accuracy.txt"
+                project_path,
+                f"saved_models/FewNodeFeatureModel/epoch_{epoch}/accuracy.txt",
             ),
             "w",
         ) as file:
             file.write(str(accuracy_action) + "\n" + str(accuracy_danger))
 
         with open(
-            os.path.join(project_path, "saved_models/NoDropoutModel/current_epoch.txt"),
+            os.path.join(
+                project_path, "saved_models/FewNodeFeatureModel/current_epoch.txt"
+            ),
             "w",
         ) as file:
             file.write(str(epoch + 1))
