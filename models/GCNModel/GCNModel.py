@@ -6,7 +6,6 @@ sys.path.insert(0, project_path)
 
 import torch
 import torch.nn as nn
-from torchvision import transforms
 
 from components.ResnetGCN.ResnetGCN import ResnetGCN
 

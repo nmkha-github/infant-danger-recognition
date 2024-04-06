@@ -19,7 +19,6 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-
 # Prepare data
 video_folder_path = os.path.join(project_path, "data/Short_Videos")
 train_excel_path = os.path.join(project_path, "data/Short_Videos/annotation/train.xlsx")
@@ -114,7 +113,7 @@ while True:
 
             outputs_action = model(
                 graph=graph
-            )  # example output: tensor([0.1, 0.2, 0.3, 0.2, 0.2]) and tensor([0.443])
+            )  # example output: tensor([0.1, 0.2, 0.3, 0.2, 0.2])
             outputs_action = outputs_action.unsqueeze(0)
             batch_outputs_action = torch.cat((batch_outputs_action, outputs_action), 0)
 
