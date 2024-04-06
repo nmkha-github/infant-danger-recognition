@@ -163,7 +163,7 @@ while True:
         f"Epoch {epoch}: Loss {total_loss} Accuracy Action: {accuracy_action}, Accuracy Danger: {accuracy_danger}"
     )
 
-    if epoch % 1 == 0:
+    if epoch % 10 == 0:
         save_dir = os.path.join(
             project_path, f"saved_models/FewNodeFeatureModel/epoch_{epoch}/"
         )

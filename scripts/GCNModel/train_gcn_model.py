@@ -141,7 +141,7 @@ while True:
     accuracy_action = total_correct_action / total_samples
     print(f"Epoch {epoch}: Loss {total_loss} Accuracy Action: {accuracy_action}")
 
-    if epoch % 1 == 0:
+    if epoch % 10 == 0:
         save_dir = os.path.join(project_path, f"saved_models/GCNModel/epoch_{epoch}/")
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)

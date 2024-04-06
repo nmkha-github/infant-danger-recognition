@@ -23,9 +23,9 @@ class ResidualBlock(nn.Module):
     def forward(self, x, edge_index):
         identity = x
         x = self.bn1(self.conv1(x, edge_index))
-        x = torch.relu(x.clone())
+        x = F.relu(x).clone()
         x = self.bn2(self.conv2(x, edge_index))
-        x = torch.relu(x.clone())
+        x = F.relu(x).clone()
 
         if self.downsample_conv is not None:
             identity = self.downsample_bn(
@@ -45,7 +45,6 @@ class ResnetGCN(nn.Module):
     ):
         super(ResnetGCN, self).__init__()
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
         if not hidden_channels:
             hidden_channels = [out_channels]
         self.conv1 = GCNConv(in_channels, hidden_channels[0])
@@ -64,7 +63,7 @@ class ResnetGCN(nn.Module):
         data.x = F.normalize(data.x, p=2, dim=0)
         data = data.to(self.device)
 
-        out = torch.relu(self.conv1(data.x, data.edge_index).clone())
+        out = F.relu(self.conv1(data.x, data.edge_index)).clone()
         for block in self.blocks:
             out = block(out, data.edge_index)
         out = self.conv2(out, data.edge_index)
