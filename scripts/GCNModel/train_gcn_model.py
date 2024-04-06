@@ -3,6 +3,8 @@ import os
 
 import numpy as np
 
+from models.GCNModel.GCNModel import GCNModel
+
 project_path = os.getcwd()
 sys.path.insert(0, project_path)
 
@@ -11,7 +13,6 @@ import torch
 import torch.optim as optim
 from tqdm import tqdm
 from dataset.ActioinVideoDataset import ActionVideoDataset
-from models.FewNodeFeatureModel.FewNodeFeatureModel import FewNodeFeatureModel
 from torch import nn
 from torch.utils.data import DataLoader
 
@@ -33,12 +34,12 @@ train_dataloader = DataLoader(train_dataset, batch_size=128, shuffle=True)
 
 # Initialize your model
 num_class = 5
-model = FewNodeFeatureModel(num_class)
+model = GCNModel(num_class)
 
 # Define loss function and optimizer
 criterion_action = nn.CrossEntropyLoss()
 criterion_danger = nn.BCELoss()
-optimizer = optim.Adam(model.parameters(), lr=0.05)
+optimizer = optim.Adam(model.parameters(), lr=0.01)
 
 # Load
 # initial_loss_action, initial_loss_danger = map(
@@ -49,9 +50,7 @@ optimizer = optim.Adam(model.parameters(), lr=0.05)
 # )
 
 epoch = int(
-    open(
-        os.path.join(project_path, "saved_models/FewNodeFeatureModel/current_epoch.txt")
-    )
+    open(os.path.join(project_path, "saved_models/GCNModel/current_epoch.txt"))
     .read()
     .strip()
 )
@@ -62,7 +61,7 @@ if epoch > 0:
         torch.load(
             os.path.join(
                 project_path,
-                f"saved_models/FewNodeFeatureModel/epoch_{previous_epoch}/FewNodeFeatureModel_epoch_{previous_epoch}.pth",
+                f"saved_models/GCNModel/epoch_{previous_epoch}/GCNModel_epoch_{previous_epoch}.pth",
             )
         )
     )
@@ -70,7 +69,7 @@ if epoch > 0:
         torch.load(
             os.path.join(
                 project_path,
-                f"saved_models/FewNodeFeatureModel/epoch_{previous_epoch}/optimizer_epoch_{previous_epoch}.pth",
+                f"saved_models/GCNModel/epoch_{previous_epoch}/optimizer_epoch_{previous_epoch}.pth",
             )
         )
     )
@@ -85,7 +84,6 @@ while True:
     model.train()
 
     total_correct_action = 0
-    total_correct_danger = 0
     total_samples = 0
     total_loss = 0
 
@@ -106,7 +104,6 @@ while True:
         batch_outputs_action = torch.empty(0, num_class, requires_grad=True).to(
             model.device
         )  # num class = 5
-        batch_outputs_danger = torch.empty(0, requires_grad=True).to(model.device)
         for batch_index, frames in enumerate(batch_frames):
             graph = None
             if batch_video_index[batch_index].item() in dict_graph:
@@ -116,37 +113,23 @@ while True:
                 graph = Graph(frames=np_frames)
                 dict_graph[batch_video_index[batch_index].item()] = graph
 
-            outputs_action, outputs_danger = model(
+            outputs_action = model(
                 graph=graph, context_frame=frames[len(frames) // 2]
             )  # example output: tensor([0.1, 0.2, 0.3, 0.2, 0.2]) and tensor([0.443])
             outputs_action = outputs_action.unsqueeze(0)
             batch_outputs_action = torch.cat((batch_outputs_action, outputs_action), 0)
-            batch_outputs_danger = torch.cat((batch_outputs_danger, outputs_danger), 0)
 
         # Loss function
         loss_action = criterion_action(
             batch_outputs_action, batch_action_label
         )  # Assuming labels are action classes
-        loss_danger = criterion_danger(
-            batch_outputs_danger, batch_danger_label
-        )  # Assuming you have danger labels
 
-        # alpha = torch.tensor(2)
-        # lambda1 = torch.pow(loss_action.item() / initial_loss_action, alpha)
-        # lambda2 = torch.pow(loss_danger.item() / initial_loss_danger, alpha)
-
-        loss = loss_action + loss_danger
+        loss = loss_action
 
         # Result in train dataset
         # Compute accuracy for action
         _, predicted_action = torch.max(batch_outputs_action, 1)
         total_correct_action += (predicted_action == batch_action_label).sum().item()
-
-        # Compute accuracy for danger
-        predicted_danger = (
-            batch_outputs_danger > 0.5
-        ).float()  # assuming threshold 0.5
-        total_correct_danger += (predicted_danger == batch_danger_label).sum().item()
 
         total_samples += batch_frames.size(0)
 
@@ -158,15 +141,10 @@ while True:
 
     # Calculate accuracy
     accuracy_action = total_correct_action / total_samples
-    accuracy_danger = total_correct_danger / total_samples
-    print(
-        f"Epoch {epoch}: Loss {total_loss} Accuracy Action: {accuracy_action}, Accuracy Danger: {accuracy_danger}"
-    )
+    print(f"Epoch {epoch}: Loss {total_loss} Accuracy Action: {accuracy_action}")
 
     if epoch % 1 == 0:
-        save_dir = os.path.join(
-            project_path, f"saved_models/FewNodeFeatureModel/epoch_{epoch}/"
-        )
+        save_dir = os.path.join(project_path, f"saved_models/GCNModel/epoch_{epoch}/")
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
 
@@ -174,21 +152,19 @@ while True:
             model.state_dict(),
             os.path.join(
                 project_path,
-                f"saved_models/FewNodeFeatureModel/epoch_{epoch}/FewNodeFeatureModel_epoch_{epoch}.pth",
+                f"saved_models/GCNModel/epoch_{epoch}/GCNModel_epoch_{epoch}.pth",
             ),
         )
         torch.save(
             optimizer.state_dict(),
             os.path.join(
                 project_path,
-                f"saved_models/FewNodeFeatureModel/epoch_{epoch}/optimizer_epoch_{epoch}.pth",
+                f"saved_models/GCNModel/epoch_{epoch}/optimizer_epoch_{epoch}.pth",
             ),
         )
 
         with open(
-            os.path.join(
-                project_path, f"saved_models/FewNodeFeatureModel/epoch_{epoch}/loss.txt"
-            ),
+            os.path.join(project_path, f"saved_models/GCNModel/epoch_{epoch}/loss.txt"),
             "w",
         ) as file:
             file.write(str(total_loss))
@@ -196,16 +172,14 @@ while True:
         with open(
             os.path.join(
                 project_path,
-                f"saved_models/FewNodeFeatureModel/epoch_{epoch}/accuracy.txt",
+                f"saved_models/GCNModel/epoch_{epoch}/accuracy.txt",
             ),
             "w",
         ) as file:
-            file.write(str(accuracy_action) + "\n" + str(accuracy_danger))
+            file.write(str(accuracy_action))
 
         with open(
-            os.path.join(
-                project_path, "saved_models/FewNodeFeatureModel/current_epoch.txt"
-            ),
+            os.path.join(project_path, "saved_models/GCNModel/current_epoch.txt"),
             "w",
         ) as file:
             file.write(str(epoch + 1))

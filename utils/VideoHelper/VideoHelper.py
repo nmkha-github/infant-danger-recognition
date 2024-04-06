@@ -31,7 +31,7 @@ class VideoHelper:
             cap.release()
             return frames
         except Exception as e:
-            print(f"Error extracting frames: {e}")
+            print(f"Error extracting frames: {e} , {video_path}")
             return []
 
     @staticmethod
