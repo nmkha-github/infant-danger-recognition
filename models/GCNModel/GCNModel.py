@@ -19,6 +19,7 @@ class GCNModel(nn.Module):
 
     def __init__(self, num_action_class=5):
         super(GCNModel, self).__init__()
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.gcn = ResnetGCN()
         self.action_classify = nn.Sequential(
             nn.Linear(512, 256),
@@ -28,8 +29,7 @@ class GCNModel(nn.Module):
         )
 
     def forward(self, graph):
-        with torch.no_grad():
-            feature = self.gcn(node_features=graph.nodes, edges=graph.edges)
-            action_output = self.action_classify(feature)
+        feature = self.gcn(node_features=graph.nodes, edges=graph.edges)
+        action_output = self.action_classify(feature)
 
-            return action_output
+        return action_output

@@ -3,8 +3,6 @@ import os
 
 import numpy as np
 
-from models.GCNModel.GCNModel import GCNModel
-
 project_path = os.getcwd()
 sys.path.insert(0, project_path)
 
@@ -13,6 +11,7 @@ import torch
 import torch.optim as optim
 from tqdm import tqdm
 from dataset.ActioinVideoDataset import ActionVideoDataset
+from models.GCNModel.GCNModel import GCNModel
 from torch import nn
 from torch.utils.data import DataLoader
 
@@ -114,7 +113,7 @@ while True:
                 dict_graph[batch_video_index[batch_index].item()] = graph
 
             outputs_action = model(
-                graph=graph, context_frame=frames[len(frames) // 2]
+                graph=graph
             )  # example output: tensor([0.1, 0.2, 0.3, 0.2, 0.2]) and tensor([0.443])
             outputs_action = outputs_action.unsqueeze(0)
             batch_outputs_action = torch.cat((batch_outputs_action, outputs_action), 0)

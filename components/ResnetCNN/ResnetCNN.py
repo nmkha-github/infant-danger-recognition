@@ -10,6 +10,5 @@ class ResnetCNN(nn.Module):
         self.resnet = nn.Sequential(*list(self.resnet.children())[:-1])
 
     def forward(self, x):
-        with torch.no_grad():
-            features = self.resnet(x)
-            return features.view(-1)
+        features = self.resnet(x)
+        return features.view(-1)

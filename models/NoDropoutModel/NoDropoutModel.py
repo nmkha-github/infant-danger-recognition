@@ -46,26 +46,25 @@ class NoDropoutModel(nn.Module):
         )
 
     def forward(self, graph, context_frame):
-        with torch.no_grad():
-            assert context_frame.shape == (
-                3,
-                224,
-                224,
-            ), "Reshape frame to (3, 224, 224)"
+        assert context_frame.shape == (
+            3,
+            224,
+            224,
+        ), "Reshape frame to (3, 224, 224)"
 
-            # GCN flow
-            feature1 = self.gcn(node_features=graph.nodes, edges=graph.edges)
+        # GCN flow
+        feature1 = self.gcn(node_features=graph.nodes, edges=graph.edges)
 
-            # CNN flow
-            context_frame = NoDropoutModel.nomarlize_frame(context_frame)
-            feature2 = self.cnn(context_frame)
+        # CNN flow
+        context_frame = NoDropoutModel.nomarlize_frame(context_frame)
+        feature2 = self.cnn(context_frame)
 
-            combine_feature = torch.cat((feature1, feature2), dim=0)
-            MLP_output = self.MLP(combine_feature)
+        combine_feature = torch.cat((feature1, feature2), dim=0)
+        MLP_output = self.MLP(combine_feature)
 
-            action_output = self.action_classify(MLP_output)
-            danger_output = self.danger_recognition(MLP_output)
-            return action_output, danger_output
+        action_output = self.action_classify(MLP_output)
+        danger_output = self.danger_recognition(MLP_output)
+        return action_output, danger_output
 
     @staticmethod
     def nomarlize_frame(frame):
