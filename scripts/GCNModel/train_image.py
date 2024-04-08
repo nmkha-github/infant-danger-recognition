@@ -12,7 +12,7 @@ import torch
 import torch.optim as optim
 from tqdm import tqdm
 from models.GCNModel.GCNModel import GCNModel
-from dataset import ActionImageDataset
+from dataset.ActionImageDataset import ActionImageDataset
 from torch import nn
 from torch.utils.data import DataLoader
 
@@ -21,8 +21,10 @@ import warnings
 warnings.filterwarnings("ignore")
 
 # Prepare data
-image_folder_path = os.path.join(project_path, "data/train")
-train_csv_path = os.path.join(project_path, "data/train/_annotations.csv")
+image_folder_path = os.path.join(project_path, "data/ASD_dataset")
+train_csv_path = os.path.join(
+    project_path, "data/ASD_dataset/annotation/_annotation.csv"
+)
 
 train_dataset = ActionImageDataset(image_folder_path, train_csv_path)
 train_dataloader = DataLoader(train_dataset, batch_size=512, shuffle=True)
