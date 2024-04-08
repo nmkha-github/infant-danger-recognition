@@ -34,6 +34,7 @@ train_dataloader = DataLoader(train_dataset, batch_size=128, shuffle=True)
 # Initialize your model
 num_class = 5
 model = SimpleModel(num_class)
+model.to(model.device)  # Move model to device
 
 # Define loss function and optimizer
 criterion_action = nn.CrossEntropyLoss()
@@ -73,7 +74,6 @@ optimizer.load_state_dict(
 for param_group in optimizer.param_groups:
     param_group["lr"] = 0.01
 
-model.to(model.device)  # Move model to device
 print("##########Training with ", model.device)
 
 dict_graph = {}

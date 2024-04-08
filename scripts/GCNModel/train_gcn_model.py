@@ -33,6 +33,7 @@ train_dataloader = DataLoader(train_dataset, batch_size=128, shuffle=True)
 # Initialize your model
 num_class = 5
 model = GCNModel(num_class)
+model.to(model.device)  # Move model to device
 
 # Define loss function and optimizer
 criterion_action = nn.CrossEntropyLoss()
@@ -72,7 +73,6 @@ if epoch > 0:
         )
     )
 
-model.to(model.device)  # Move model to device
 print("##########Training with ", model.device)
 
 dict_graph = {}
