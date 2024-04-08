@@ -26,7 +26,8 @@ class CNN3D(nn.Module):
             nn.Linear(128 * 28 * 28 * 2, 512),  # Calculate the input size after max pooling
             nn.ReLU(),
             nn.Dropout(0.5),
-            nn.Linear(512, num_classes)
+            nn.Linear(512, num_classes),
+            nn.Softmax(dim=0)
         )
 
         self.danger_recognition = nn.Sequential(
@@ -34,13 +35,7 @@ class CNN3D(nn.Module):
             nn.Linear(128 * 28 * 28 * 2, 512),  # Calculate the input size after max pooling
             nn.ReLU(),
             nn.Dropout(0.5),
-            nn.Linear(512, 256),
-            nn.ReLU(),
-            nn.Dropout(p=0.5, inplace=True),
-            nn.Linear(256, 128),
-            nn.ReLU(),
-            nn.Dropout(p=0.5, inplace=True),
-            nn.Linear(128, 1),
+            nn.Linear(512, 1),
             nn.Sigmoid()
         )
 
@@ -52,7 +47,6 @@ class CNN3D(nn.Module):
 
         action_output = self.action_classify(feature_vector)
         danger_output = self.danger_recognition(feature_vector)
-        danger_output = danger_output.view(-1)
         return action_output, danger_output
 
     # def nomarlize_frame(frames):

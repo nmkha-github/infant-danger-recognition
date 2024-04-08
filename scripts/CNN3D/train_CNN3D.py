@@ -1,5 +1,5 @@
 import sys
-import osg
+import os
 
 import numpy as np
 
@@ -29,7 +29,7 @@ validate_excel_path = os.path.join(
 test_excel_path = os.path.join(project_path, "data/Short_Videos/annotation/test.xlsx")
 
 train_dataset = ActionVideoDataset(video_folder_path, train_excel_path)
-train_dataloader = DataLoader(train_dataset, batch_size=4, shuffle=True)
+train_dataloader = DataLoader(train_dataset, batch_size=16, shuffle=True)
 
 # Initialize your model
 num_class = 5
@@ -40,38 +40,30 @@ criterion_action = nn.CrossEntropyLoss()
 criterion_danger = nn.BCELoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-# Load
-initial_loss_action, initial_loss_danger = map(
-    float,
-    open(os.path.join(project_path, "saved_models/CNN3D/init_parameter_loss.txt"))
-    .read()
-    .split(),
-)
-
 epoch = int(
     open(os.path.join(project_path, "saved_models/CNN3D/current_epoch.txt"))
     .read()
     .strip()
 )
-previous_epoch = epoch - 1
-model.load_state_dict(
-    torch.load(
-        os.path.join(
-            project_path,
-            f"saved_models/CNN3D/epoch_{previous_epoch}/CNN3D_epoch_{previous_epoch}.pth",
+
+if epoch > 0:
+    previous_epoch = epoch - 1
+    model.load_state_dict(
+        torch.load(
+            os.path.join(
+                project_path,
+                f"saved_models/CNN3D/epoch_{previous_epoch}/CNN3D_epoch_{previous_epoch}.pth",
+            )
         )
     )
-)
-optimizer.load_state_dict(
-    torch.load(
-        os.path.join(
-            project_path,
-            f"saved_models/CNN3D/epoch_{previous_epoch}/optimizer_epoch_{previous_epoch}.pth",
+    optimizer.load_state_dict(
+        torch.load(
+            os.path.join(
+                project_path,
+                f"saved_models/CNN3D/epoch_{previous_epoch}/optimizer_epoch_{previous_epoch}.pth",
+            )
         )
     )
-)
-for param_group in optimizer.param_groups:
-    param_group["lr"] = 0.01
 
 model.to(model.device)  # Move model to device
 print("##########Training with ", model.device)
@@ -93,31 +85,30 @@ while True:
         )
         #-------------------------------------------------------
         # Forward pass
-        batch_frames = batch_frames.permute(0, 4, 2, 3, 1) # change torch[batch_size, 20, 224, 224, 3] to torch[batch_size, 3, 224, 224, 20]
+        batch_frames = batch_frames.permute(0, 2, 1, 3, 4) # change torch[batch_size, 20, 224, 224, 3] to torch[batch_size, 3, 224, 224, 20]
+        
         batch_frames = batch_frames.to(model.device)
 
         action_output, danger_output  = model(batch_frames)
         batch_action_label = batch_action_label.to(model.device)
         batch_danger_label = batch_danger_label.to(model.device)
+        
+        danger_output = danger_output.squeeze() # change torch[batch_size, 1] to torch[batch_size]
 
         loss_action = criterion_action(action_output, batch_action_label)
         loss_danger = criterion_danger(danger_output, batch_danger_label)
         #-------------------------------------------------------
 
-        alpha = torch.tensor(2)
-        lambda1 = torch.pow(loss_action.item() / initial_loss_action, alpha)
-        lambda2 = torch.pow(loss_danger.item() / initial_loss_danger, alpha)
-
-        loss = lambda1 * loss_action + lambda2 * loss_danger
+        loss = loss_action + loss_danger
 
         # Result in train dataset
         # Compute accuracy for action
-        _, predicted_action = torch.max(batch_action_label, 1)
+        _, predicted_action = torch.max(action_output, 1)
         total_correct_action += (predicted_action == batch_action_label).sum().item()
 
         # Compute accuracy for danger
         predicted_danger = (
-            batch_danger_label > 0.5
+            danger_output > 0.5
         ).float()  # assuming threshold 0.5
         total_correct_danger += (predicted_danger == batch_danger_label).sum().item()
 
@@ -125,6 +116,7 @@ while True:
 
         total_loss += loss.item()
 
+        optimizer.zero_grad()
         # Backward pass and optimize
         loss.backward()
         optimizer.step()
