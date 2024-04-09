@@ -27,10 +27,10 @@ train_csv_path = os.path.join(
 )
 
 train_dataset = ActionImageDataset(image_folder_path, train_csv_path)
-train_dataloader = DataLoader(train_dataset, batch_size=512, shuffle=True)
+train_dataloader = DataLoader(train_dataset, batch_size=64, shuffle=True)
 
 # Initialize your model
-num_class = 51
+num_class = 56
 model = GCNModel(num_class)
 model.to(model.device)  # Move model to device
 
