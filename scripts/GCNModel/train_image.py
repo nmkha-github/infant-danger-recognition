@@ -22,9 +22,7 @@ warnings.filterwarnings("ignore")
 
 # Prepare data
 image_folder_path = os.path.join(project_path, "data/ASD_dataset")
-train_csv_path = os.path.join(
-    project_path, "data/ASD_dataset/annotation/_annotation.csv"
-)
+train_csv_path = os.path.join(project_path, "data/ASD_dataset/annotation/train.csv")
 
 train_dataset = ActionImageDataset(image_folder_path, train_csv_path)
 train_dataloader = DataLoader(train_dataset, batch_size=64, shuffle=True)
