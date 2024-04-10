@@ -12,6 +12,5 @@ conda activate simple_thesis_model
 nvidia-smi
 nvcc --version
 conda list pytorch
-cd infant-danger-recognition
 
-python scripts/CNN3D/train_CNN3D.py
+python train_CNN3D.py
