@@ -6,7 +6,6 @@ import numpy as np
 project_path = os.getcwd()
 sys.path.insert(0, project_path)
 
-from components.Graph.Graph import Graph
 import torch
 import torch.optim as optim
 from tqdm import tqdm
@@ -68,7 +67,6 @@ if epoch > 0:
 model.to(model.device)  # Move model to device
 print("##########Training with ", model.device)
 
-dict_graph = {}
 # Training loop
 while True:
     print(f"Training epoch {epoch}...")
