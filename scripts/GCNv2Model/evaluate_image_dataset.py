@@ -115,6 +115,7 @@ for epoch_dir in tqdm(
     print(f"\nEvaluating epoch {epoch}...")
     model_path = os.path.join(models_dir, epoch_dir, f"GCNv2Model_epoch_{epoch}.pth")
     model = GCNv2Model(num_class)
+    model.evaluate()
     model.to(model.device)
     model.load_state_dict(torch.load(model_path))
 
