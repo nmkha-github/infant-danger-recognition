@@ -29,9 +29,9 @@ train_dataset = ActionImageDataset(image_folder_path, train_csv_path)
 val_dataset = ActionImageDataset(image_folder_path, val_csv_path)
 test_dataset = ActionImageDataset(image_folder_path, test_csv_path)
 
-train_dataloader = DataLoader(train_dataset, batch_size=32, shuffle=False)
-val_dataloader = DataLoader(val_dataset, batch_size=32, shuffle=False)
-test_dataloader = DataLoader(test_dataset, batch_size=32, shuffle=False)
+train_dataloader = DataLoader(train_dataset, batch_size=64, shuffle=False)
+val_dataloader = DataLoader(val_dataset, batch_size=64, shuffle=False)
+test_dataloader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
 # Initialize your model
 num_class = 56
@@ -42,7 +42,6 @@ criterion_action = nn.CrossEntropyLoss()
 
 
 def evaluate(model, dataloader, criterion_action):
-    model.eval()
     total_correct_action = 0
     total_samples = 0
     total_loss = 0
@@ -122,23 +121,22 @@ for epoch_dir in tqdm(
     train_loss, train_accuracy = evaluate(model, train_dataloader, criterion_action)
     train_losses.append(train_loss)
     train_accuracies.append(train_accuracy)
+    print(
+        f"\nEpoch {epoch}: Train Loss: {train_loss:.4f}, Train Accuracy: {train_accuracy:.4f}"
+    )
 
     # Evaluate on validation set
     val_loss, val_accuracy = evaluate(model, val_dataloader, criterion_action)
     val_losses.append(val_loss)
     val_accuracies.append(val_accuracy)
+    print(
+        f"Epoch {epoch}: Validation Loss: {val_loss:.4f}, Validation Accuracy: {val_accuracy:.4f}"
+    )
 
     # Evaluate on test set
     test_loss, test_accuracy = evaluate(model, test_dataloader, criterion_action)
     test_losses.append(test_loss)
     test_accuracies.append(test_accuracy)
-
-    print(
-        f"\nEpoch {epoch}: Train Loss: {train_loss:.4f}, Train Accuracy: {train_accuracy:.4f}"
-    )
-    print(
-        f"Epoch {epoch}: Validation Loss: {val_loss:.4f}, Validation Accuracy: {val_accuracy:.4f}"
-    )
     print(
         f"Epoch {epoch}: Test Loss: {test_loss:.4f}, Test Accuracy: {test_accuracy:.4f}"
     )
@@ -158,6 +156,7 @@ plt.clf()
 # Plot accuracy curve
 plt.plot(epochs, train_accuracies, label="Train")
 plt.plot(epochs, val_accuracies, label="Validation")
+plt.plot(epochs, test_accuracies, label="Test")
 plt.xlabel("Epoch")
 plt.ylabel("Accuracy")
 plt.title("Accuracy Curve")
