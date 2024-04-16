@@ -11,7 +11,7 @@ from components.Graph.Graph import Graph
 import torch
 import torch.optim as optim
 from tqdm import tqdm
-from models.GCNDropoutModel.GCNDropoutModel import GCNDropoutModel
+from models.GCNv2Model.GCNv2Model import GCNv2Model
 from dataset.ActionImageDataset import ActionImageDataset
 from torch import nn
 from torch.utils.data import DataLoader
@@ -29,7 +29,7 @@ train_dataloader = DataLoader(train_dataset, batch_size=64, shuffle=True)
 
 # Initialize your model
 num_class = 56
-model = GCNDropoutModel(num_class)
+model = GCNv2Model(num_class)
 model.to(model.device)  # Move model to device
 
 # Define loss function and optimizer
