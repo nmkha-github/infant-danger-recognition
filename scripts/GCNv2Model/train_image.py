@@ -35,7 +35,7 @@ model.to(model.device)  # Move model to device
 # Define loss function and optimizer
 criterion_action = nn.CrossEntropyLoss()
 criterion_danger = nn.BCELoss()
-optimizer = optim.Adam(model.parameters(), lr=0.0001)
+optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 epoch = int(
     open(os.path.join(project_path, "saved_models/GCNv2Model/current_epoch.txt"))

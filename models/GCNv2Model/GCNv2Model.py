@@ -21,14 +21,16 @@ class GCNv2Model(nn.Module):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.gcn = ResnetGCN()
         self.action_classify = nn.Sequential(
+            nn.Linear(512, 1024),
+            nn.ReLU(),
+            nn.Dropout(p=0.5),
+            nn.Linear(1024, 512),
+            nn.ReLU(),
+            nn.Dropout(p=0.5),
             nn.Linear(512, 256),
             nn.ReLU(),
             nn.Dropout(p=0.5),
-            nn.Linear(256, 128),
-            nn.ReLU(),
-            nn.Dropout(p=0.5),
-            nn.Linear(128, num_action_class),
-            nn.Softmax(dim=0),
+            nn.Linear(256, num_action_class),
         )
 
     def forward(self, graph):
@@ -38,8 +40,7 @@ class GCNv2Model(nn.Module):
         return action_output
 
     def evaluate(self):
-        with torch.no_grad():
-            # Iterate through each module in the action_classify sequential module
-            for module in self.action_classify:
-                if isinstance(module, nn.Dropout):
-                    module.eval()
+        # Iterate through each module in the action_classify sequential module
+        for module in self.action_classify:
+            if isinstance(module, nn.Dropout):
+                module.eval()
