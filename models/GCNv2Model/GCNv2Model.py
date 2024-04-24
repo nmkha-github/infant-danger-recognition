@@ -23,13 +23,13 @@ class GCNv2Model(nn.Module):
         self.action_classify = nn.Sequential(
             nn.Linear(512, 1024),
             nn.ReLU(),
-            nn.Dropout(p=0.5),
+            nn.Dropout(p=0.6),
             nn.Linear(1024, 512),
             nn.ReLU(),
-            nn.Dropout(p=0.5),
+            nn.Dropout(p=0.6),
             nn.Linear(512, 256),
             nn.ReLU(),
-            nn.Dropout(p=0.5),
+            nn.Dropout(p=0.6),
             nn.Linear(256, num_action_class),
         )
 

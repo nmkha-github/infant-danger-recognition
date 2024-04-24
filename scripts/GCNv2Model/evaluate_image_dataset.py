@@ -95,7 +95,7 @@ def evaluate(model, dataloader, criterion_action):
 
 
 # Directory containing saved models
-models_dir = os.path.join(project_path, "saved_models/GCNv2Model/evaluate")
+models_dir = os.path.join(project_path, "saved_models/GCNv2Model70/evaluate")
 
 # Lists to store loss and accuracy values
 train_losses = []
@@ -113,7 +113,7 @@ for epoch_dir in tqdm(
 ):
     epoch = int(epoch_dir.split("_")[1])
     print(f"\nEvaluating epoch {epoch}...")
-    model_path = os.path.join(models_dir, epoch_dir, f"GCNv2Model_epoch_{epoch}.pth")
+    model_path = os.path.join(models_dir, epoch_dir, f"GCNv2Model70_epoch_{epoch}.pth")
     model = GCNv2Model(num_class)
     model.evaluate()
     model.to(model.device)
