@@ -38,8 +38,10 @@ num_class = 56
 dict_graph = {}
 
 # Define loss function
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 criterion_action = nn.CrossEntropyLoss()
-criterion_danger = nn.BCELoss()
+pos_weight = torch.tensor([50.0]).to(device)
+criterion_danger = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
 
 
 def evaluate(model, dataloader, criterion_action, criterion_danger):
@@ -83,7 +85,7 @@ def evaluate(model, dataloader, criterion_action, criterion_danger):
 
             # Compute accuracy for danger
             predicted_danger = (
-                batch_outputs_danger > 0.5
+                torch.sigmoid(batch_outputs_danger) > 0.5
             ).float()  # assuming threshold 0.5
             total_correct_danger += (
                 (predicted_danger == batch_danger_label).sum().item()
@@ -122,7 +124,7 @@ for epoch_dir in tqdm(
     print(f"\nEvaluating epoch {epoch}...")
     model_path = os.path.join(models_dir, epoch_dir, f"Resnet2DModel_epoch_{epoch}.pth")
     model = Resnet2DModel(num_class)
-    model.evaluate()
+    model.eval()
     model.to(model.device)
     model.load_state_dict(torch.load(model_path))
 

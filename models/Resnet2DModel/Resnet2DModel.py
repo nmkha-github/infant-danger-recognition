@@ -21,11 +21,12 @@ class Resnet2DModel(nn.Module):
         super(Resnet2DModel, self).__init__()
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.resnet = resnet18(weights=ResNet18_Weights.DEFAULT)
+        self.resnet = nn.Sequential(*list(self.resnet.children())[:-1])
         for param in self.resnet.parameters():
             param.requires_grad = False
 
         self.action_classify = nn.Sequential(
-            nn.Linear(1000, 1024),
+            nn.Linear(512, 1024),
             nn.ReLU(),
             nn.Dropout(p=0.5),
             nn.Linear(1024, 512),
@@ -38,7 +39,7 @@ class Resnet2DModel(nn.Module):
         )
 
         self.danger_classify = nn.Sequential(
-            nn.Linear(1000, 1024),
+            nn.Linear(512, 1024),
             nn.ReLU(),
             nn.Dropout(p=0.5),
             nn.Linear(1024, 512),
@@ -48,23 +49,13 @@ class Resnet2DModel(nn.Module):
             nn.ReLU(),
             nn.Dropout(p=0.5),
             nn.Linear(256, 1),
-            nn.Sigmoid(),
         )
 
     def forward(self, x: torch.Tensor):
         # Add batch size dimension
         feature = self.resnet(x.float())
-
+        feature = torch.squeeze(feature)
         action_output = self.action_classify(feature)
         danger_output = self.danger_classify(feature)
 
         return action_output, danger_output
-
-    def evaluate(self):
-        # Iterate through each module in the action_classify sequential module
-        for module in self.action_classify:
-            if isinstance(module, nn.Dropout):
-                module.eval()
-        for module in self.danger_classify:
-            if isinstance(module, nn.Dropout):
-                module.eval()

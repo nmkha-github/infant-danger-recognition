@@ -34,7 +34,8 @@ model.to(model.device)  # Move model to device
 
 # Define loss function and optimizer
 criterion_action = nn.CrossEntropyLoss()
-criterion_danger = nn.BCELoss()
+pos_weight = torch.tensor([50.0]).to(model.device)
+criterion_danger = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 epoch = int(
@@ -71,6 +72,7 @@ while True:
 
     total_correct_action = 0
     total_correct_danger = 0
+    total_danger_samples = 0
     total_samples = 0
     total_loss = 0
 
@@ -107,7 +109,7 @@ while True:
 
         # Compute accuracy for danger
         predicted_danger = (
-            batch_outputs_danger > 0.5
+            torch.sigmoid(batch_outputs_danger) > 0.5
         ).float()  # assuming threshold 0.5
         total_correct_danger += (predicted_danger == batch_danger_label).sum().item()
 
@@ -126,7 +128,7 @@ while True:
         f"Epoch {epoch}: Loss {total_loss} Accuracy Action: {accuracy_action}, Accuracy Danger: {accuracy_danger}"
     )
 
-    if epoch % 2 == 0:
+    if epoch % 4 == 0:
         save_dir = os.path.join(
             project_path, f"saved_models/Resnet2DModel/epoch_{epoch}/"
         )
