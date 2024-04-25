@@ -6,9 +6,9 @@ project_path = os.getcwd()
 sys.path.insert(0, project_path)
 
 import torch
+from models.VisionTransformerModel.VisionTransformerModel import VisionTransformerModel
 from dataset.ActionImageDataset import ActionImageDataset
 from torch.utils.data import DataLoader
-from models.Resnet2DModel.Resnet2DModel import Resnet2DModel
 
 
 def compute_confusion_matrix(model, dataloader):
@@ -70,9 +70,9 @@ test_dataloader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
 # Initialize your model
 epoch = 4
-model_path = f"saved_models\Resnet2DModel\epoch_{epoch}\Resnet2DModel_epoch_{epoch}.pth"
+model_path = f"saved_models\VisionTransformerModel\epoch_{epoch}\VisionTransformerModel_epoch_{epoch}.pth"
 num_class = 56
-model = Resnet2DModel(num_class)
+model = VisionTransformerModel(num_class)
 model.eval()
 model.to(model.device)
 model.load_state_dict(torch.load(model_path))
