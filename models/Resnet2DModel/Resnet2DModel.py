@@ -49,6 +49,7 @@ class Resnet2DModel(nn.Module):
             nn.ReLU(),
             nn.Dropout(p=0.5),
             nn.Linear(256, 1),
+            nn.Sigmoid(),
         )
 
     def forward(self, x: torch.Tensor):
