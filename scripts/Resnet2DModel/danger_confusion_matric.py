@@ -34,7 +34,7 @@ def compute_confusion_matrix(model, dataloader):
             batch_outputs_action, batch_outputs_danger = model(batch_image)
 
         # Predictions
-        predicted_danger = (torch.sigmoid(batch_outputs_danger) > 0.5).float()
+        predicted_danger = (batch_outputs_danger > 0.5).float()
 
         # Update confusion matrix counts for each class
         for pred, label in zip(predicted_danger, batch_danger_label):
@@ -69,7 +69,7 @@ val_dataloader = DataLoader(val_dataset, batch_size=64, shuffle=False)
 test_dataloader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
 # Initialize your model
-epoch = 4
+epoch = 220
 model_path = f"saved_models\Resnet2DModel\epoch_{epoch}\Resnet2DModel_epoch_{epoch}.pth"
 num_class = 56
 model = Resnet2DModel(num_class)
