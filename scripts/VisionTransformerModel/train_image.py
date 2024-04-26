@@ -36,7 +36,7 @@ model.to(model.device)  # Move model to device
 criterion_action = nn.CrossEntropyLoss()
 pos_weight = torch.tensor([50.0]).to(model.device)
 criterion_danger = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
-optimizer = optim.Adam(model.parameters(), lr=0.001)
+optimizer = optim.Adam(model.parameters(), lr=0.00001)
 
 epoch = int(
     open(
@@ -113,7 +113,7 @@ while True:
 
         # Compute accuracy for danger
         predicted_danger = (
-            torch.sigmoid(batch_outputs_danger) > 0.5
+            batch_outputs_danger > 0.5
         ).float()  # assuming threshold 0.5
         total_correct_danger += (predicted_danger == batch_danger_label).sum().item()
 

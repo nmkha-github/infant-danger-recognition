@@ -109,7 +109,7 @@ while True:
 
         # Compute accuracy for danger
         predicted_danger = (
-            torch.sigmoid(batch_outputs_danger) > 0.5
+            batch_outputs_danger > 0.5
         ).float()  # assuming threshold 0.5
         total_correct_danger += (predicted_danger == batch_danger_label).sum().item()
 
