@@ -30,11 +30,13 @@ train_dataloader = DataLoader(train_dataset, batch_size=64, shuffle=True)
 # Initialize your model
 num_class = 56
 model = VisionTransformerModel(num_class)
+for param in model.vit.parameters():
+    param.requires_grad = True
 model.to(model.device)  # Move model to device
 
 # Define loss function and optimizer
 criterion_action = nn.CrossEntropyLoss()
-pos_weight = torch.tensor([2.0]).to(model.device)
+pos_weight = torch.tensor([50.0]).to(model.device)
 criterion_danger = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
 optimizer = optim.Adam(model.parameters(), lr=0.000001)
 
