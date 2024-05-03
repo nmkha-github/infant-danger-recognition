@@ -38,7 +38,7 @@ model.to(model.device)  # Move model to device
 criterion_action = nn.CrossEntropyLoss()
 pos_weight = torch.tensor([50.0]).to(model.device)
 criterion_danger = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
-optimizer = optim.Adam(model.parameters(), lr=0.000001)
+optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 epoch = int(
     open(
