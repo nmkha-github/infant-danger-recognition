@@ -19,15 +19,26 @@ class DangerImageDataset(Dataset):
             items=["filename", "class"]
         )
 
+        self.annotations = self.upsample_class1(self.annotations)
+
+    def upsample_class1(self, df):
+        class0 = df[df["class"] == 0]
+        class1 = df[df["class"] == 1]
+        ratio = len(class0) // len(class1)
+        class1_upsampled = class1.copy()
+        for _ in range(int(ratio - 1)):
+            class1_upsampled = pd.concat([class1_upsampled, class1])
+        return pd.concat([class0, class1_upsampled])
+
     def __len__(self):
         return len(self.annotations)
 
     def __getitem__(self, idx):
         image_info = self.annotations.iloc[idx]
-        image_index = image_info["filename"]
+        image_index = int(image_info["filename"])
         danger_label = image_info["class"]
 
-        image_path = os.path.join(self.image_folder, f"img_{image_index}.jpg")
+        image_path = os.path.join(self.image_folder, f"image_{image_index}.jpg")
         image = Image.open(image_path)
         transform = transforms.Compose(
             [transforms.Resize((224, 224)), transforms.PILToTensor()]
